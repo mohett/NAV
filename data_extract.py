@@ -6,6 +6,7 @@ from datetime import datetime
 # Get today's date
 today = datetime.today()
 
+
 ########################################################################################################################
 
 def remove_duplicates(df: pd.DataFrame, search_column: str, file_name: str, search_keys: list = None):
@@ -74,30 +75,49 @@ result_0 = pd.merge(non_duplicate_payment_df, non_duplicate_members_df, how='lef
 result_0.columns = result_0.columns.str.strip()
 result_0["Medlemstype"] = result_0["Medlemstype"].str.strip().str.capitalize()
 membership["Medlemstype"] = membership["Medlemstype"].str.strip().str.capitalize()
-result_1 = pd.merge(result_0, membership, how='left', on=["Periode", "Medlemstype"])
-result_1.columns = result_1.columns.str.strip()
-########################################################################################################################
-
-new_order = ['Innbetalt_dato', 'Periode', 'Medlemsnummer', 'Medlemstype', 'Fødselsdato', 'Aldersgruppe', 'Fornavn',
-             'Etternavn',
-             'Kjønn', 'Gateadresse', 'Postnummer', 'Poststed', 'Kontingent', 'Beløp']
-result_1 = result_1[new_order]
-print(result_1.columns.to_list())
 
 
 ########################################################################################################################
+
 def decide_member_age(df: pd.DataFrame, date_column: str, new_column_name: str):
     df[new_column_name] = pd.to_datetime(df[date_column], format="%d.%m.%Y", errors='coerce')
     df[new_column_name] = ((today - df[new_column_name]).dt.days // 365).fillna(-1).astype(int)
-    # df[new_column_name] = df[new_column_name].dt.year
-
-def decide_membership(df: pd.DataFrame, df1: pd.DataFrame):
-    df1['Kontingent']
 
 
 decide_member_age(result_0, 'Fødselsdato', 'Alder')
 
-result_0.to_csv('dt_result.csv', index=False)
+
+def decide_range(df: pd.DataFrame):
+    if '-' in df:  # For ranges like '18-60'
+        start, end = map(int, df.split('-'))
+        return start, end
+    elif '+' in df:  # For ranges like '60+'
+        start = int(df.rstrip(' +'))
+        return start + 1, 150
+
+
+def is_within_range(number, lower_bound, upper_bound):
+    return lower_bound <= number <= upper_bound
+
+
+# def correct_membership(df: pd.DataFrame):
+
+
+
+print(membership.columns.to_list())
+membership['Intervall'] = membership['Aldersgruppe'].apply(decide_range)
+########################################################################################################################
+result_1 = pd.merge(result_0, membership, how='left', on=["Periode", "Medlemstype"])
+result_1.columns = result_1.columns.str.strip()
+
+new_order = ['Innbetalt_dato', 'Periode', 'Medlemsnummer', 'Fødselsdato', 'Medlemstype', 'Aldersgruppe', 'Intervall',
+             'Alder', 'Fornavn', 'Etternavn', 'Kjønn', 'Gateadresse', 'Postnummer', 'Poststed', 'Kontingent', 'Beløp']
+result_1 = result_1[new_order]
+# result_1['Membership Assessment'] = result_1['Alder'].apply(is_within_range(result_1['Intervall'].str.strip()))
+########################################################################################################################
+
+
+result_1.to_csv('dt_result.csv', index=False)
 
 # print(2024 - dt1_new['Ny Fødselsdato'].dt.year)
 
