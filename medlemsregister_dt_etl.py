@@ -62,10 +62,10 @@ def remove_duplicates(df: pd.DataFrame, search_column: str, file_name: str, sear
         return duplicates[search_column].tolist(), non_duplicates_df
 
 
-data_file = os.path.dirname(__file__) + '/nav/data/Datagrunnlag.xlsx'
+data_file = os.path.dirname(__file__) + '/data/Datagrunnlag.xlsx'
 
 members = pd.read_excel(data_file, sheet_name='Medlemmer')
-membership = pd.read_excel(data_file, sheet_name='Kontingent')
+membership = pd.read_excel(data_file, sheet_name='Kontingent ')
 payment = pd.read_excel(data_file, sheet_name='Betalinger')
 
 duplicate_members_list, members = remove_duplicates(members, 'Medlemsnummer',
@@ -167,7 +167,19 @@ historic_payment_with_member_data['FeilMedlemstype'] = historic_payment_with_mem
 historic_payment_with_member_data['FeilBetaling'] = historic_payment_with_member_data['Beløp'] != \
                                                     historic_payment_with_member_data['Kontingent']
 
+historic_payment_with_member_data['Tilbakebetaling'] = historic_payment_with_member_data['Kontingent'] - \
+                                                    historic_payment_with_member_data['Beløp']
+
+
+new_order = ['Innbetalt_dato', 'Periode', 'Medlemsnummer', 'Fødselsdato', 'Alder', 'Aldersgruppe', 'Fornavn',
+             'Etternavn', 'Kjønn', 'Gateadresse', 'Postnummer', 'Poststed', 'MedlemstypeGammel', 'MedlemstypeNy',
+             'FeilMedlemstype', 'Kontingent', 'Beløp', 'FeilBetaling', 'Tilbakebetaling']
+
+historic_payment_with_member_data = historic_payment_with_member_data[new_order]
+
 historic_payment_with_member_data.to_excel('results.xlsx', index=False)
+
+
 
 # def is_within_range(number, lower_bound, upper_bound):
 #     return lower_bound <= number <= upper_bound
@@ -181,9 +193,8 @@ historic_payment_with_member_data.to_excel('results.xlsx', index=False)
 # result_1 = pd.merge(historic_payment_with_member_data, membership, how='left', on=["Periode", "Medlemstype"])
 # result_1.columns = result_1.columns.str.strip()
 #
-# new_order = ['Innbetalt_dato', 'Periode', 'Medlemsnummer', 'Fødselsdato', 'Medlemstype', 'Aldersgruppe', 'Intervall',
-#              'Alder', 'Fornavn', 'Etternavn', 'Kjønn', 'Gateadresse', 'Postnummer', 'Poststed', 'Kontingent', 'Beløp']
-# result_1 = result_1[new_order]
+
+
 # result_1['Membership Assessment'] = result_1['Alder'].apply(is_within_range(result_1['Intervall'].str.strip()))
 ########################################################################################################################
 # result_1['Intervall'] = result_1['Intervall'].str.strip().astype(str)
