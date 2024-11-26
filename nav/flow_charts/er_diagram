@@ -1,0 +1,30 @@
+digraph "ER Diagram" {
+	rankdir=LR
+	Medlemmer [label="Medlemmer
+- Medlemsnummer (PK)
+- Fornavn
+- Etternavn
+-  Fødselsdato
+- Kjønn
+-  Medlemstype
+- Gateadresse
+ -  Postnummer
+- Poststed" shape=box]
+	Betalinger [label="Betalinger
+- Medlemsnummer (FK)
+- Beløp
+ Periode
+- Innbetalt_dato" shape=box]
+	Kontingent [label="Kontingent
+- Medlemstype (PK)
+- Periode (PK)
+- Kontingent
+ -Aldersgrupe
+" shape=box]
+	Medlemmer -> Betalinger [label="1:M
+via Medlemsnummer"]
+	Medlemmer -> Kontingent [label="1:M
+via Medlemstype"]
+	Betalinger -> Kontingent [label="Indirekte
+via Medlemstype og Periode" style=dotted]
+}
